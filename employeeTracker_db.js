@@ -14,20 +14,25 @@ var connection = mysql.createConnection({
 
   // Your password
   password: "tawhid1954",
-  database: "employee_db"
+  database: "employeeTracker_db"
 });
 
 // connect to the mysql server and sql database
 connection.connect(function(err) {
-  if (err) throw err;
+  if (err) {
+    console.error("error connecting: " + err.stack);
+    return;
+  }
+  console.log("connected as id " + connection.threadId);
   // run the start function after the connection is made to prompt the user
-  start();
+  employeeInfo();
 });
 
 
 
 
 const employeeInfo = () => {
+
 
     inquirer.prompt([
     
@@ -67,22 +72,25 @@ const employeeInfo = () => {
             else{
           connection.end();
         }
+        
       });
+     
   }
+      
 
-  const viewAll = () => {
+  // function viewAll () 
+    function viewAll () {
     console.log("Viewing all Employees");
-    connection.query("SELECT name FROM employeeTracker", (err, res) => {
+    connection.query("SELECT * FROM employeeTracker", (err, res) => {
       if (err) throw err;
    
-      console.log(res);
+      console.table(res)
       connection.end();
-    viewAll();
-  })
-}
+    })
+  }
 
 
-   const viewDepartment = () => {
+   function viewDepartment () {
 
     inquirer
     .prompt({
@@ -97,51 +105,55 @@ const employeeInfo = () => {
         })
     .then(answer => {
     console.log("Viewing all employees by department");
-    connection.query("SELECT name FROM employeeTracker WHERE department = ?",
-    
+   connection.query("SELECT * FROM employeeTracker WHERE * = ?",
     {
       department: answer.department
     },
+    
     (err, res) => {
       if (err) throw err;
 
-      console.log(res);
+      console.table(res);
       connection.end();
-    viewDepartment();
     })
   })
 }
 
 
 const viewManager = () => {
+  connection.query("SELECT manager FROM employeeTracker", (err, results) =>{
+  if (err) throw err;
 
   inquirer
   .prompt({
     type: "list",
     name: "manager",
-    message: "Choose a department",
-    choices:  ["Sales", 
-              "Engineering", 
-              "Finance",
-              "Legal"
-              ]
+    message: "What is the managers name?",
+    choices:  function () {
+    let managerArray = [];
+     for (let i=0; i<results.length; i++){
+       managerArray.push(results[i].manager)
+          }
+        }
       })
-  .then(answer => {
+    })
+      .then(answer => {
   console.log("Viewing all employees by manager");
-  connection.query("SELECT name FROM employeeTracker WHERE manager = ?",
   
-  {
-    manager: answer.manager
-  },
-  (err, res) => {
-    if (err) throw err;
+  
+  // {
+  //   manager: answer.manager
+  // },
+  // (err, res) => {
+    
 
-    console.log(res);
-    connection.end();
+  //   console.log(res);
+  //   connection.end();
   viewManager();
   })
-})
-}
+ }
+
+
 
 
 
