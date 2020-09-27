@@ -10,6 +10,6 @@ CREATE TABLE employeeTracker(
   title VARCHAR(30) NOT NULL,
   department VARCHAR(45) NOT NULL,
   salary INT default 0,
-  manager VARCHAR(20) NOT NULL,
+  manager VARCHAR(20),
   PRIMARY KEY (id)
 );

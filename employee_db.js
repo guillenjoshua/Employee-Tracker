@@ -71,9 +71,77 @@ const employeeInfo = () => {
   }
 
   const viewAll = () => {
+    console.log("Viewing all Employees");
+    connection.query("SELECT name FROM employeeTracker", (err, res) => {
+      if (err) throw err;
+   
+      console.log(res);
+      connection.end();
+    viewAll();
+  })
+}
 
+
+   const viewDepartment = () => {
+
+    inquirer
+    .prompt({
+      type: "list",
+      name: "department",
+      message: "Choose a department",
+      choices:  ["Sales", 
+                "Engineering", 
+                "Finance",
+                "Legal"
+                ]
+        })
+    .then(answer => {
+    console.log("Viewing all employees by department");
+    connection.query("SELECT name FROM employeeTracker WHERE department = ?",
     
-  }
+    {
+      department: answer.department
+    },
+    (err, res) => {
+      if (err) throw err;
+
+      console.log(res);
+      connection.end();
+    viewDepartment();
+    })
+  })
+}
+
+
+const viewManager = () => {
+
+  inquirer
+  .prompt({
+    type: "list",
+    name: "manager",
+    message: "Choose a department",
+    choices:  ["Sales", 
+              "Engineering", 
+              "Finance",
+              "Legal"
+              ]
+      })
+  .then(answer => {
+  console.log("Viewing all employees by manager");
+  connection.query("SELECT name FROM employeeTracker WHERE manager = ?",
+  
+  {
+    manager: answer.manager
+  },
+  (err, res) => {
+    if (err) throw err;
+
+    console.log(res);
+    connection.end();
+  viewManager();
+  })
+})
+}
 
 
 
@@ -83,54 +151,3 @@ const employeeInfo = () => {
 
 
 
-
-
-
-    
-    // .then(firstAnswer => {
-    //             const {answer} = firstAnswer;
-    
-    //         switch(answer) {
-    
-    //             //Switch for Add Employee
-    //             case "Add Employee":
-    //                 updateEmployee(answer, "addEmployee", "What is employee's first name?", firstAnswer);
-    //             break;
-
-    //             case "Add Employee":
-    //                 updateEmployee(answer, "addEmployee", "What is employee's last name?", firstAnswer);
-    //             break;
-
-    //             case "Add Employee":
-    //                 updateEmployee(answer, "addEmployee", "What is employee's role?", firstAnswer);
-    //             break;
-
-    //             case "Add Employee":
-    //                 updateEmployee(answer, "addEmployee", "Who is employee's managers?", firstAnswer);
-    //             break;
-    
-    //             //Switch for Employee Update  Role
-    //             case "Update Employee Role":
-    //                 updateEmployee(answer, "updateEmployee", "What is the Engineer's Github profile username?", firstAnswer);
-    //             break;
-    
-    //             //Switch for Employee Mnager Update
-    //             case "Update Employee Manager":
-    //                 updateEmployee(answer, "updateManager", "What is the name of the employee?", firstAnswer);
-    //             break;
-    //         }
-    //     });
-    // }
-
-    // const roleSpecific = (update, inputType, message, answerOne) => {
-    //     inquirer.prompt ([
-    //             {
-    //                 type: "input",
-    //                 name: inputType,
-    //                 message: message
-    //             }
-    //         ])
-
-
-
-    employeeInfo();
