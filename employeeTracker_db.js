@@ -308,6 +308,51 @@ function viewManager () {
   }
 
 
+  //Update Employee Manager
+
+  function updateManager () {
+    connection.query("SELECT * FROM employeeTracker", function (err, results) {
+    if (err) throw err;
+  
+    inquirer
+    .prompt([
+      {
+      type: "list",
+      name: "employeeManager",
+      message: "Which employee would you like to update?",
+      choices:  function () {
+      let managerUpdateArray = [];
+       for (let i=0; i<results.length; i++){
+         managerUpdateArray.push(results[i].first_name)
+            }
+            return managerUpdateArray; 
+        }
+      },
+        {
+          type: "input",
+          name: "manager",
+          message: "What is the name of the new manager?",
+        }
+      ])
+        .then(answer => {
+          connection.query("UPDATE employeeTracker SET ? WHERE ?",
+        [
+        {
+          manager: answer.manager
+        },
+        {
+          first_name: answer.employeeManager
+        }
+        ],
+        function(err, res) {
+          if (err) throw err;
+          viewAll();
+        }
+          )
+        })
+  
+      })
+    }
 
 
 
