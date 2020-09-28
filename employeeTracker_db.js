@@ -30,9 +30,8 @@ connection.connect(function(err) {
 
 
 
-
+//Main Menu
 const employeeInfo = () => {
-
 
     inquirer.prompt([
     
@@ -78,7 +77,7 @@ const employeeInfo = () => {
   }
       
 
-  // function viewAll () 
+  // View All Employees 
     function viewAll () {
     console.log("Viewing all Employees");
     connection.query("SELECT * FROM employeeTracker", (err, res) => {
@@ -90,34 +89,39 @@ const employeeInfo = () => {
   }
 
 //View Employee by Department
-   function viewDepartment () {
+function viewDepartment () {
+  connection.query("SELECT * FROM employeeTracker", function (err, results)  {
+  if (err) throw err;
 
-    inquirer
-    .prompt({
-      type: "list",
-      name: "department",
-      message: "Choose a department",
-      choices:  ["Sales", 
-                "Engineering", 
-                "Finance",
-                "Legal"
-                ]
+  inquirer
+  .prompt({
+    type: "list",
+    name: "department",
+    message: "Choose a department",
+    choices:  function () {
+    let departmentArray = [];
+     for (let i=0; i<results.length; i++){
+       departmentArray.push(results[i].department)
+          }
+          return departmentArray; 
+        }
+      })
+          .then(answer => {
+          connection.query( "Select * FROM employeeTracker WHERE ?",
+
+        {
+          department: answer.department
+        },
+        function (err, res) {
+        if (err) throw err; 
+        console.table(res)
+        employeeInfo(); 
+          }
+        )
+         
         })
-    .then(answer => {
-    console.log("Viewing all employees by department");
-   connection.query("SELECT * FROM employeeTracker WHERE department = ?",
-    {
-      department: answer.department
-    },
-    
-    (err, res) => {
-      if (err) throw err;
-
-      console.table(res);
-      connection.end();
     })
-  })
-}
+ }
 
 //View Employee by Manager
 function viewManager () {
@@ -208,8 +212,9 @@ function viewManager () {
             },
             function(err) {
               if (err) throw err;
-              console.log("Your auction was created successfully!");
-              viewAll(); 
+              console.log("Employee Added!");
+              viewAll();
+              employeeInfo(); 
             }
       );
 
@@ -249,6 +254,7 @@ function viewManager () {
             if (err) throw err;
             console.log("Employee Removed");
             viewAll();
+            employeeInfo(); 
           }
         )
       })
