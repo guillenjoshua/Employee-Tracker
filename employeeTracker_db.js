@@ -85,11 +85,11 @@ const employeeInfo = () => {
       if (err) throw err;
    
       console.table(res)
-      connection.end();
+      employeeInfo();
     })
   }
 
-
+//View Employee by Department
    function viewDepartment () {
 
     inquirer
@@ -105,7 +105,7 @@ const employeeInfo = () => {
         })
     .then(answer => {
     console.log("Viewing all employees by department");
-   connection.query("SELECT * FROM employeeTracker WHERE * = ?",
+   connection.query("SELECT * FROM employeeTracker WHERE department = ?",
     {
       department: answer.department
     },
@@ -119,9 +119,9 @@ const employeeInfo = () => {
   })
 }
 
-
+//View Employee by Manager
 function viewManager () {
-  connection.query("SELECT manager FROM employeeTracker", (err, results) =>{
+  connection.query("SELECT * FROM employeeTracker", function (err, results)  {
   if (err) throw err;
 
   inquirer
@@ -134,23 +134,24 @@ function viewManager () {
      for (let i=0; i<results.length; i++){
        managerArray.push(results[i].manager)
           }
+          return managerArray; 
         }
       })
-    })
-      .then(answer => {
-  console.log("Viewing all employees by manager");
-  
-  
-  // {
-  //   manager: answer.manager
-  // },
-  // (err, res) => {
-    
+          .then(answer => {
+          connection.query( "Select * FROM employeeTracker WHERE ?",
 
-  //   console.log(res);
-  //   connection.end();
-  
-  })
+        {
+          manager: answer.manager
+        },
+        function (err, res) {
+        if (err) throw err; 
+        console.table(res)
+        employeeInfo(); 
+          }
+        )
+         
+        })
+    })
  }
 
 
@@ -217,7 +218,6 @@ function viewManager () {
  }
 
  //Remove Employee Function
-
  function removeEmployee() {
   connection.query("SELECT * FROM employeeTracker", function(err, results) {
     if (err) throw err;
@@ -226,7 +226,7 @@ function viewManager () {
   .prompt([
     {
       name: "employee",
-      type: "rawlist",
+      type: "list",
       message: "Which employee would you like to remove?",
       choices: function() {
         let employeeArray = [];
