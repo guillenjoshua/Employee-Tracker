@@ -154,7 +154,7 @@ function viewManager () {
  }
 
 
-
+//Add Employee Function 
  function addEmployee () {
 
   inquirer
@@ -213,8 +213,48 @@ function viewManager () {
       );
 
     })
+    
+ }
 
-     
+ //Remove Employee Function
+
+ function removeEmployee() {
+  connection.query("SELECT * FROM employeeTracker", function(err, results) {
+    if (err) throw err;
+  
+  inquirer
+  .prompt([
+    {
+      name: "employee",
+      type: "rawlist",
+      message: "Which employee would you like to remove?",
+      choices: function() {
+        let employeeArray = [];
+        for (let i = 0; i < results.length; i++) {
+          employeeArray.push(results[i].first_name);
+        }
+        return employeeArray;
+      }
+      
+    },
+  ])
+  .then(answer => {
+    connection.query( "DELETE FROM employeeTracker WHERE ?",
+
+          {
+            first_name: answer.employee
+
+          },
+          function(err, res) {
+            if (err) throw err;
+            console.log("Employee Removed");
+            viewAll();
+          }
+        )
+      })
+
+  })
+
  }
 
 
