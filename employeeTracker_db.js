@@ -46,7 +46,8 @@ const employeeInfo = () => {
                 "Add Employee",
                 "Remove Employee",
                 "Update Employee Title", 
-                "Update Employee Manager"
+                "Update Employee Manager",
+                "View All Roles"
             ]
         },
         
@@ -67,7 +68,9 @@ const employeeInfo = () => {
             updateRole();
           } else if(answer.choose === "Update Employee Manager") {
             updateManager();
-          } 
+          } else if(answer.choose === "View All Roles") {
+            viewRoles();
+          }
             else{
           connection.end();
         }
@@ -354,6 +357,16 @@ function viewManager () {
       })
     }
 
+    //View All Roles
+    function viewRoles () {
+      console.log("Viewing all Roles");
+      connection.query("SELECT title FROM employeeTracker", (err, res) => {
+        if (err) throw err;
+     
+        console.table(res)
+        employeeInfo();
+      })
+    }
 
 
 
