@@ -120,7 +120,7 @@ const employeeInfo = () => {
 }
 
 
-const viewManager = () => {
+function viewManager () {
   connection.query("SELECT manager FROM employeeTracker", (err, results) =>{
   if (err) throw err;
 
@@ -149,8 +149,72 @@ const viewManager = () => {
 
   //   console.log(res);
   //   connection.end();
-  viewManager();
+  
   })
+ }
+
+
+
+ function addEmployee () {
+
+  inquirer
+  .prompt([
+    {
+      name: "first_name",
+      type: "input",
+      message: "What is the employees first name?"
+    },
+    {
+      name: "last_name",
+      type: "input",
+      message: "What is the employees last name?"
+    },
+    {
+      name: "title",
+      type: "input",
+      message: "What is the employees job title?"
+    },
+    {
+      name: "department",
+      type: "list",
+      message: "Which Department does the employee work in?",
+      choices:  ["Sales", 
+                "Engineering", 
+                "Finance",
+                "Legal"
+                ]
+    },
+    {
+      name: "salary",
+      type: "input",
+      message: "What is the employees salary?"
+    },
+    {
+      name: "manager",
+      type: "input",
+      message: "Who is the employees manager?"
+    },
+  ])
+    .then(answer => {
+      connection.query("INSERT INTO employeeTracker SET ?", 
+            {
+                first_name: answer.first_name,
+                last_name: answer.last_name, 
+                title: answer.title,
+                department: answer.department, 
+                salary: answer.salary,
+                manager: answer.manager
+            },
+            function(err) {
+              if (err) throw err;
+              console.log("Your auction was created successfully!");
+              viewAll(); 
+            }
+      );
+
+    })
+
+     
  }
 
 
