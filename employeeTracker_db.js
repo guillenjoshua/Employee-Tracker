@@ -40,12 +40,12 @@ const employeeInfo = () => {
             name: "choose",
             message:"Main Menu: What would you like to do?",
             choices: [
-                "View all employees",
-                "View all employees by department",
-                "View all employees by manager",
+                "View All Employees",
+                "View All Employees by Department",
+                "View All Employees by Manager",
                 "Add Employee",
                 "Remove Employee",
-                "Update Employee Role", 
+                "Update Employee Title", 
                 "Update Employee Manager"
             ]
         },
@@ -53,18 +53,18 @@ const employeeInfo = () => {
     ])
     .then(answer => {
         // based on their answer, either call the bid or the post functions
-        if (answer.choose === "View all employees") {
+        if (answer.choose === "View All Employees") {
           viewAll();
-        }   else if(answer.choose === "View all employees by department") {
+        }   else if(answer.choose === "View All Employees by Department") {
             viewDepartment();
-          } else if(answer.choose === "View all employees by manager") {
+          } else if(answer.choose === "View All Employees by Manager") {
             viewManager();
           } else if(answer.choose === "Add Employee") {
             addEmployee();
           } else if(answer.choose === "Remove Employee") {
             removeEmployee();
-          } else if(answer.choose === "Update Employee Role") {
-            upadateRole();
+          } else if(answer.choose === "Update Employee Title") {
+            updateRole();
           } else if(answer.choose === "Update Employee Manager") {
             updateManager();
           } 
@@ -260,8 +260,57 @@ function viewManager () {
       })
 
   })
-
  }
+
+ //Update Employee Role
+ function updateRole () {
+  connection.query("SELECT * FROM employeeTracker", function (err, results) {
+  if (err) throw err;
+
+  inquirer
+  .prompt([
+    {
+    type: "list",
+    name: "employeeName",
+    message: "Which employee would you like to update?",
+    choices:  function () {
+    let employeeUpdateArray = [];
+     for (let i=0; i<results.length; i++){
+       employeeUpdateArray.push(results[i].first_name)
+          }
+          return employeeUpdateArray; 
+      }
+    },
+      {
+        type: "input",
+        name: "title",
+        message: "What is the employee's new title?",
+      }
+    ])
+      .then(answer => {
+        connection.query("UPDATE employeeTracker SET ? WHERE ?",
+      [
+      {
+        title: answer.title
+      },
+      {
+        first_name: answer.employeeName
+      }
+      ],
+      function(err, res) {
+        if (err) throw err;
+        viewAll();
+      }
+        )
+      })
+
+    })
+  }
+
+
+
+
+
 
 
 
