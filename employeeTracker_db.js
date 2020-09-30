@@ -86,7 +86,7 @@ const employeeInfo = () => {
 // View All Employees 
 let viewAll = () => {
   console.log("Viewing all Employees");
-  connection.query("SELECT first_name, last_name, title, department, salary FROM employee JOIN employeeRole ON employee.role_id=employeeRole.id Join department ON employeeRole.department_id=department.id", (err, res) => {
+  connection.query("SELECT first_name, last_name, title, department, salary, manager_id FROM employee JOIN employeeRole ON employee.role_id=employeeRole.id Join department ON employeeRole.department_id=department.id", (err, res) => {
     if (err) throw err;
  
     console.table(res)
@@ -134,24 +134,28 @@ let viewManager = () => {
 connection.query('SELECT first_name FROM employee WHERE manager_id IS NULL', function (err, results)  {
 if (err) throw err;
 
-inquirer
-.prompt({
-  type: "list",
-  name: "manager",
-  message: "What is the managers name?",
-  choices:  function () {
+function employeeManager() {
   let managerArray = [];
    for (let i=0; i<results.length; i++){
      managerArray.push(results[i].first_name)
         }
         return managerArray; 
       }
+
+inquirer
+.prompt({
+  type: "list",
+  name: "manager",
+  message: "What is the managers name?",
+  choices:  employeeManager() 
+
     })
         .then(answer => {
+        let employeeByManager = employeeManager().indexOf(answer.manager)+1
         connection.query( "SELECT first_name, last_name, title, department, salary FROM employee LEFT JOIN employeeRole ON employee.manager_id = employeeRole.id RIGHT JOIN department ON employeeRole.department_id=department.id WHERE ?",
 
       {
-        first_name: answer.manager
+        first_name: employeeManager
       },
        (err, res) => {
       if (err) throw err; 
@@ -168,9 +172,28 @@ inquirer
 //Add Employee Function 
 let addEmployee = () => {
 
-connection.query("SELECT title, first_name  FROM employee JOIN employeeRole ON employeeRole.id = employee.id", (err, results) => {
-  if (err) throw err;
   
+
+connection.query("SELECT title, first_name, role_id, manager_id  FROM employee JOIN employeeRole ON employeeRole.id = employee.id", (err, results) => {
+  if (err) throw err;
+
+  function title () {
+    let titleArray = [];
+     for (let i=0; i<results.length; i++){
+       titleArray.push(results[i].title)
+          }
+          return titleArray; 
+        }
+
+  function manager () {
+          let managerArray = [];
+           for (let i=0; i<results.length; i++){
+             managerArray.push(results[i].first_name)
+                }
+                return managerArray; 
+              }
+
+
 inquirer
 .prompt([
   {
@@ -187,32 +210,26 @@ inquirer
     name: "title",
     type: "list",
     message: "What is the employees job title?",
-    choices: function () {
-      let titleArray = [];
-       for (let i=0; i<results.length; i++){
-         titleArray.push(results[i].title)
-            }
-            return titleArray; 
-          }
+    choices: title()
   },
-  
   {
-    name: "salary",
-    type: "input",
-    message: "What is the employees salary?"
-  },
+    name: "manager",
+    type: "rawlist",
+    message: "What is the employees manager?",
+    choices: manager()
+  }
   
 ])
   .then(answer => {
-    
-    connection.query("INSERT INTO employee FROM employee JOIN employeeRole ON employee.role_id = employeeRole.id WHERE = ?", 
+    let role_id = title().indexOf(answer.title)+1
+    let manager_id = manager().indexOf(answer.manager)+1
+    connection.query("INSERT INTO employee SET ?", 
           {
               first_name: answer.first_name,
-              last_name: answer.last_name, 
-              title: answer.title,
-              salary: answer.salary, 
-              
-             
+              last_name: answer.last_name,
+              role_id: role_id,
+              manager_id: manager_id
+          
           },
           (err) => {
             if (err) throw err;
@@ -228,7 +245,7 @@ inquirer
 
 //Remove Employee Function
 let removeEmployee = () => {
-connection.query("SELECT * FROM employeeTracker", (err, results) => {
+connection.query("SELECT * FROM employee", (err, results) => {
   if (err) throw err;
 
 inquirer
@@ -248,7 +265,7 @@ inquirer
   },
 ])
 .then(answer => {
-  connection.query( "DELETE FROM employeeTracker WHERE ?",
+  connection.query( "DELETE FROM employee WHERE ?",
 
         {
           first_name: answer.employee
@@ -268,8 +285,17 @@ inquirer
 
 //Update Employee Role
 let updateRole = () => {
-connection.query("SELECT * FROM employeeTracker", (err, results) => {
+connection.query("SELECT first_name, title FROM employee JOIN employeeRole ON employee.role_id = employeeRole.id", (err, results) => {
 if (err) throw err;
+
+function newTitle () {
+  let titleArray = [];
+   for (let i=0; i<results.length; i++){
+     titleArray.push(results[i].title)
+        }
+        return titleArray; 
+      }
+
 
 inquirer
 .prompt([
@@ -286,16 +312,18 @@ inquirer
     }
   },
     {
-      type: "input",
+      type: "list",
       name: "title",
       message: "What is the employee's new title?",
+      choices: newTitle() 
     }
   ])
     .then(answer => {
-      connection.query("UPDATE employeeTracker SET ? WHERE ?",
+      let employeeNewTitle =  newTitle().indexOf(answer.title)+1
+      connection.query("UPDATE employee SET ? WHERE ?",
     [
     {
-      title: answer.title
+      role_id: employeeNewTitle
     },
     {
       first_name: answer.employeeName
@@ -314,10 +342,20 @@ inquirer
 
 //Update Employee Manager
 
-let updateManager = () => {
-  connection.query("SELECT * FROM employeeTracker", (err, results) => {
-  if (err) throw err;
 
+let managerUpdate = () => {
+  connection.query("SELECT first_name FROM employee WHERE manager_id IS NULL")
+  let managerUpdateArr = [];
+   for (let i=0; i<results.length; i++){
+     managerUpdateArr.push(results[i].first_name)
+        }
+        return managerUpdateArr; 
+    }
+
+let updateManager = () => {
+  connection.query("SELECT first_name FROM employee JOIN employeeRole ON employee.role_id = employeeRole.id", (err, results) => {
+  if (err) throw err;
+  
   inquirer
   .prompt([
     {
@@ -336,13 +374,15 @@ let updateManager = () => {
         type: "input",
         name: "manager",
         message: "What is the name of the new manager?",
+        choices: managerUpdate()
       }
     ])
       .then(answer => {
-        connection.query("UPDATE employeeTracker SET ? WHERE ?",
+        let updateManagerId = managerUpdate().forEach(answer.manger)+1
+        connection.query("UPDATE employee SET ? WHERE ?",
       [
       {
-        manager: answer.manager
+        manager_id: updateManagerId
       },
       {
         first_name: answer.employeeManager
@@ -408,11 +448,5 @@ connection.query("SELECT id, SUM(salary) AS total, salary FROM employeeTracker",
 
 
 
-
-  // Manager
-  // SELECT first_name, last_name, title, department, salary FROM employee JOIN employeeRole ON employee.role_id=employeeRole.id Join department ON employeeRole.department_id=department.id WHERE ?
-
-  //Add Employee
-  // INSERT INTO employee (first_name, last_name, role_id, manager_id) SELECT first_name, last_name, role_id, manager_id FROM employee JOIN employeeRole WHERE = ?
 
 
