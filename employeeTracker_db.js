@@ -43,7 +43,7 @@ const employeeInfo = () => {
               "View All Employees",
               "View All Employees by Department",
               "View All Employees by Manager",
-              "View All Roles",
+              "View All Employees by Role",
               "Add Employee",
               "Remove Employee",
               "Update Employee Title", 
@@ -69,7 +69,7 @@ const employeeInfo = () => {
           updateRole();
         } else if(answer.choose === "Update Employee Manager") {
           updateManager();
-        } else if(answer.choose === "View All Roles") {
+        } else if(answer.choose === "View All Employees by Role") {
           viewRoles();
         }else if(answer.choose === "Combined Salary Total") {
           combinedSalaries();
@@ -129,6 +129,43 @@ inquirer
   })
 }
 
+
+//View All Roles
+let viewRoles = () => {
+  connection.query("SELECT * FROM employeeRole", function (err, results)  {
+  if (err) throw err;
+  
+  inquirer
+  .prompt({
+    type: "list",
+    name: "title",
+    message: "Choose a department",
+    choices:  function () {
+    let departmentArray = [];
+     for (let i=0; i<results.length; i++){
+       departmentArray.push(results[i].title)
+          }
+          return departmentArray; 
+        }
+      })
+          .then(answer => {
+          connection.query( "SELECT first_name, last_name, title, department, salary FROM employee JOIN employeeRole ON employee.role_id=employeeRole.id Join department ON employeeRole.department_id=department.id WHERE ?",
+  
+        {
+          title: answer.title
+        },
+         (err, res) => {
+        if (err) throw err; 
+        console.table(res)
+        employeeInfo(); 
+          }
+        )
+         
+        })
+    })
+  }
+  
+
 //View Employee by Manager
 let viewManager = () => {
 connection.query('SELECT first_name FROM employee WHERE manager_id IS NULL', function (err, results)  {
@@ -152,11 +189,12 @@ inquirer
     })
         .then(answer => {
         let employeeByManager = employeeManager().indexOf(answer.manager)+1
-        connection.query( "SELECT first_name, last_name, title, department, salary FROM employee LEFT JOIN employeeRole ON employee.manager_id = employeeRole.id RIGHT JOIN department ON employeeRole.department_id=department.id WHERE ?",
+        connection.query( "SELECT first_name, last_name, title, department, salary FROM employee JOIN employeeRole ON employee.manager_id = employeeRole.id JOIN department ON employeeRole.department_id=department.id WHERE ?",
 
       {
-        first_name: employeeManager
+        first_name: employeeByManager
       },
+      
        (err, res) => {
       if (err) throw err; 
       console.table(res)
@@ -341,8 +379,6 @@ inquirer
 
 
 //Update Employee Manager
-
-
 let managerUpdate = () => {
   connection.query("SELECT first_name FROM employee WHERE manager_id IS NULL")
   let managerUpdateArr = [];
@@ -398,46 +434,12 @@ let updateManager = () => {
     })
   }
 
-//View All Roles
-let viewRoles = () => {
-connection.query("SELECT * FROM employeeRole", function (err, results)  {
-if (err) throw err;
-
-inquirer
-.prompt({
-  type: "list",
-  name: "title",
-  message: "Choose a department",
-  choices:  function () {
-  let departmentArray = [];
-   for (let i=0; i<results.length; i++){
-     departmentArray.push(results[i].title)
-        }
-        return departmentArray; 
-      }
-    })
-        .then(answer => {
-        connection.query( "SELECT first_name, last_name, title, department, salary FROM employee JOIN employeeRole ON employee.role_id=employeeRole.id Join department ON employeeRole.department_id=department.id WHERE ?",
-
-      {
-        title: answer.title
-      },
-       (err, res) => {
-      if (err) throw err; 
-      console.table(res)
-      employeeInfo(); 
-        }
-      )
-       
-      })
-  })
-}
 
   //Combined Salaries
 
 let combinedSalaries = () => {
 console.log("Viewing all Salaries Combined");
-connection.query("SELECT id, SUM(salary) AS total, salary FROM employeeTracker", (err, res) => {
+connection.query("SELECT SUM(salary) AS total, salary FROM employeeRole", (err, res) => {
   if (err) throw err;
 
   console.table(res)
