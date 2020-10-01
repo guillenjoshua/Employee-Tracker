@@ -3,7 +3,7 @@
 
 ## Description
 
-The Employee Tracker allows you to view employees from the database with variours options. Ability to view employees by department and Manager, Add and Remove employees, or update the employees role/title and their manager.   
+The Employee Tracker allows you to view employees from the database with variours options. Ability to view all employees and employees by department and Role. Also have the ability to add and remove employees, as well as update the employees role/title.   
 
 ## Technologies
 The Employee Tracker is generated through node.js and the dependencies used were: mySQL to use/write data to and from the database and inquirer to prompt the user for information.    
