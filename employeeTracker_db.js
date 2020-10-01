@@ -435,11 +435,10 @@ let updateManager = () => {
   }
 
 
-  //Combined Salaries
-
+//Combined Salaries
 let combinedSalaries = () => {
 console.log("Viewing all Salaries Combined");
-connection.query("SELECT SUM(salary) AS total, salary FROM employeeRole", (err, res) => {
+connection.query("SELECT SUM(salary) AS total FROM employeeRole", (err, res) => {
   if (err) throw err;
 
   console.table(res)

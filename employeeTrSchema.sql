@@ -47,11 +47,13 @@ INSERT INTO employee (first_name, last_name, role_id, manager_id)
 VALUES ("Don", "Julio", 1, null), 
 ("Josh", "Guillen", 2, 1),
 ("Jack", "Sparrow", 3, 1),
+("Johnny", "Bravo", 3, 1), 
 ("Carlos", "Carlock", 4, 1), 
 ("Ross", "Davis", 5, 1),
 ("Matthew", "Montes", 6, null),
 ("Smokey", "Robinson", 7, 6), 
 ("Gilbert", "Godfrey", 8, null),
-("Jim", "Beam", 9, 8);
+("Jim", "Beam", 9, 8),
+("Daniel", "Larusso", 9, 8);
 
 
